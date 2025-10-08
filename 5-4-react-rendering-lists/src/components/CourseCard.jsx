@@ -1,51 +1,73 @@
 import { useState } from "react";
 import TaskItem from "./TaskItem";
 
-
 export default function CourseCard({ course, index, onMutateCourse }) {
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
 
-
-  // 📘 TASK 4 — PART A (Anchor): Implement toggle using onMutateCourse + .map()
+  // ✅ Toggle a task’s done state
   function toggleTask(id) {
-    // TODO: toggle the task with this id
+    onMutateCourse(index, (tasks) =>
+      tasks.map((t) =>
+        t.id === id ? { ...t, done: !t.done } : t
+      )
+    );
   }
 
-
-  // 📘 TASK 4 — PART A (Anchor): Implement delete using onMutateCourse + .filter()
+  // ✅ Delete a task
   function deleteTask(id) {
-    // TODO: delete the task with this id
+    onMutateCourse(index, (tasks) =>
+      tasks.filter((t) => t.id !== id)
+    );
   }
 
-
-  // 📘 TASK 4 — PART A (Anchor): Implement add using onMutateCourse
+  // ✅ Add a new task
   function addTask(e) {
     e.preventDefault();
-    // TODO: create a new task { id, title, dueDate: date, isDone: false }
-    // TODO: append it to existing tasks and reset inputs
+    if (!title.trim() || !date) return;
+
+    const newTask = {
+      id: Date.now(),
+      title: title.trim(),
+      dueDate: date,
+      done: false,
+    };
+
+    onMutateCourse(index, (tasks) => [...tasks, newTask]);
+    setTitle("");
+    setDate("");
   }
 
+  // ✅ Check if all tasks are done
+  const allDone = course.tasks.length > 0 && course.tasks.every((t) => t.done);
 
   return (
     <article className="course card">
       <header className="cardHeader">
         <h2>{course.title}</h2>
-        {/* 🟩 PART A (Anchor): Show "All caught up" badge when ALL tasks are done (logical &&) */}
+        {/* 🟩 Show “All caught up” badge when all tasks are done */}
+        {allDone && <span className="badge success">All caught up!</span>}
       </header>
 
-
-      {/* 🟩 PART A (Anchor): If NO tasks → show message; ELSE → render the list (ternary ?: ) */}
+      {/* 🟩 Conditional rendering: show message if no tasks */}
       <section className="tasksSection">
-        {/* 📘 TASK 2 — Render Tasks for Each Course */}
-        {/* 🔎 Anchor: You’ll write your code right inside this list. */}
-        <ul className="tasks">
-          {/* TODO: course.tasks.map(task => <TaskItem key={task.id} task={task} onToggle={toggleTask} onDelete={deleteTask} />) */}
-        </ul>
+        {course.tasks.length === 0 ? (
+          <p>No tasks yet. Add your first one below.</p>
+        ) : (
+          <ul className="tasks">
+            {course.tasks.map((task) => (
+              <TaskItem
+                key={task.id}
+                task={task}
+                onToggle={toggleTask}
+                onDelete={deleteTask}
+              />
+            ))}
+          </ul>
+        )}
       </section>
 
-
-      {/* Add Form (provided) */}
+      {/* 🧩 Add New Task Form */}
       <form onSubmit={addTask} className="newTask">
         <input
           className="titleField"
@@ -61,7 +83,9 @@ export default function CourseCard({ course, index, onMutateCourse }) {
             onChange={(e) => setDate(e.target.value)}
             aria-label="Due date"
           />
-          <button type="submit" className="primary">Add</button>
+          <button type="submit" className="primary">
+            Add
+          </button>
         </div>
       </form>
     </article>
